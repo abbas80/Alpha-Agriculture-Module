@@ -1,0 +1,304 @@
+#include <Wire.h>
+
+#include <ESP8266WiFi.h>
+
+const char *ssid =  "note4";     // replace with your wifi ssid and wpa2 key
+const char *pass =  "12345678";
+
+
+IPAddress ip(192,168,0,1);
+IPAddress gatewayDNS(192,168,43,185);
+IPAddress netmask(255,255,255,0);
+char server[] = "192.168.43.185"; //IP address of your computer.
+
+int interrupt=0; //Variable to control the iterations of void loop().
+
+String mod="testing"; //Variable to be written on the database.
+
+String rcv="";
+
+///int p1=D6;
+///const int p2=A0;
+ char module_id;
+    double data1=0;
+    double data2=0;
+    double data3=0;
+    double ck1=0,ck2=0,ck3=0;
+    
+WiFiClient client;
+
+
+
+
+void setup() {
+ Serial.begin(9600); /* begin serial for debug */
+ Wire.begin(D1, D2); /* join i2c bus with SDA=D1 and SCL=D2 of NodeMCU */
+
+
+
+ //pinMode(A0,INPUT);
+    ///   Serial.begin(9600);
+                      
+       //pinMode(A0,INPUT);
+      /// pinMode(p1,OUTPUT);               
+       
+     ///  delay(10);
+       
+       Serial.println("Connecting to ");
+       Serial.println(ssid); 
+       WiFi.config(ip,gatewayDNS,netmask,gatewayDNS);
+       WiFi.begin(ssid, pass); 
+       while (WiFi.status() != WL_CONNECTED) 
+          {
+            delay(500);
+            Serial.print(".");
+          }
+      Serial.println("");
+      Serial.println("WiFi connected"); 
+      Serial.println(WiFi.localIP()); 
+
+
+     }
+
+
+
+
+      void httpRequest()
+{
+  if (client.connect(server, 80)) 
+  {
+    Serial.println("Connection established 1");
+    client.print(String("GET ") + "/tryjson.php/" + " HTTP/1.1\r\n" + "Host: " + server + "\r\n" + "Connection: close\r\n\r\n"); //GET request for server response.
+    unsigned long timeout = millis();
+    while (client.available() == 0) 
+    {
+      if (millis() - timeout > 25000) //If nothing is available on server for 25 seconds, close the connection.
+      { 
+        return;
+      }
+    }
+    while(client.available())
+    {
+      String line = client.readStringUntil('\r'); //Read the server response line by line..
+      rcv+=line; //And store it in rcv.
+    }
+    client.stop(); // Close the connection.
+  }
+  else
+  {
+    Serial.println("Connection failed 1");
+  }
+  Serial.println("Received string: ");
+  Serial.println(rcv); //Display the server response.
+}
+
+
+
+int f=0;
+void loop() {
+ Wire.beginTransmission(8); /* begin with device address 8 */
+ Wire.write("Hello Arduino");  /* sends hello string */
+ Wire.endTransmission();    /* stop transmitting */
+
+ Wire.requestFrom(8, 13); /* request & read data of size 13 from slave */
+ while(Wire.available()){
+   int c1= Wire.read();
+   int c2= Wire.read();
+  int c3= Wire.read();
+
+  int c4= Wire.read();
+   int c5= Wire.read();
+  int c6= Wire.read();
+
+  int c7= Wire.read();
+   int c8= Wire.read();
+  int c9= Wire.read();
+  /// int c4= Wire.read();
+ // Serial.print(c1);
+// Serial.print(c2);
+if(f==0)
+  {
+    f=1;
+  
+ ck1=(((100*c1)+(10*c2)+c3))/100.0;
+ ck2=((100*c4)+(10*c5)+c6)/100.0;
+ ck3=((100*c7)+(10*c8)+c9)/100.0;
+ Serial.println(ck1);
+ Serial.println(ck2);
+ Serial.println(ck3);
+  }
+ }
+ Serial.println();
+ delay(1000);
+
+
+///digitalWrite(p1,HIGH);
+/// delay(1000); 
+/// digitalWrite(p1,LOW);
+ /// int ldr=analogRead(p2);
+  ///float ldr1=5.0-((ldr/1024.0)*5.0);
+  ///float scale=(ldr1/1.93)*5.0;
+  ///Serial.print(ldr1);
+  ///Serial.print("--");
+  ///Serial.print(ldr1);
+ /// Serial.print("--");
+ /// Serial.println(scale);
+
+  if(interrupt==0)
+  {
+    
+      httpRequest(); //Call the function to read the response from the server.
+      delay(1000);
+      if (client.connect(server, 80)) 
+      {
+      Serial.println("Connection Established 2");
+      // double data1=2.34;
+     // double data2=3.5;
+     // double data3=4.5;
+      client.print("GET /info.php?"); //GET request to write data to the database.
+      client.print("module_id=");
+      client.print("1721cs1028");
+      //,'data1','data2','data3');
+      client.print("&nitrogen=");
+      client.print(ck1);
+      client.print("&phosphorus=");
+      client.print(ck2);
+      client.print("&potassium=");
+      client.print(ck3);
+      client.println(" HTTP/1.1"); 
+      client.println("Host: 192.168.43.185"); 
+      client.println("Connection: close"); 
+      client.println(); 
+      client.println(); 
+      client.stop();
+      }
+      else
+      {
+        Serial.println("Connection failed 2");
+      }
+  }
+  interrupt++;
+ /// digitalWrite(p1,LOW);
+  delay(10000);
+ 
+}
+
+
+/*
+////
+#include <ESP8266WiFi.h>
+
+const char *ssid =  "INDIRA_HOSTEL FIBRE";     // replace with your wifi ssid and wpa2 key
+const char *pass =  "12345@indirahostel";
+
+
+IPAddress ip(192,168,0,1);
+IPAddress gatewayDNS(192,168,0,112);
+IPAddress netmask(255,255,255,0);
+char server[] = "192.168.0.112"; //IP address of your computer.
+
+int interrupt=0; //Variable to control the iterations of void loop().
+
+String mod="testing"; //Variable to be written on the database.
+
+String rcv="";
+
+int p1=D6;
+const int p2=A0;
+WiFiClient client;
+ 
+void setup() 
+{
+  
+       //pinMode(A0,INPUT);
+       Serial.begin(9600);
+                      
+       //pinMode(A0,INPUT);
+       pinMode(p1,OUTPUT);               
+       
+       delay(10);
+       
+       Serial.println("Connecting to ");
+       Serial.println(ssid); 
+       WiFi.config(ip,gatewayDNS,netmask,gatewayDNS);
+       WiFi.begin(ssid, pass); 
+       while (WiFi.status() != WL_CONNECTED) 
+          {
+            delay(500);
+            Serial.print(".");
+          }
+      Serial.println("");
+      Serial.println("WiFi connected"); 
+      Serial.println(WiFi.localIP()); 
+      
+}
+ void httpRequest()
+{
+  if (client.connect(server, 80)) 
+  {
+    Serial.println("Connection established 1");
+    client.print(String("GET ") + "/tryjson.php/" + " HTTP/1.1\r\n" + "Host: " + server + "\r\n" + "Connection: close\r\n\r\n"); //GET request for server response.
+    unsigned long timeout = millis();
+    while (client.available() == 0) 
+    {
+      if (millis() - timeout > 25000) //If nothing is available on server for 25 seconds, close the connection.
+      { 
+        return;
+      }
+    }
+    while(client.available())
+    {
+      String line = client.readStringUntil('\r'); //Read the server response line by line..
+      rcv+=line; //And store it in rcv.
+    }
+    client.stop(); // Close the connection.
+  }
+  else
+  {
+    Serial.println("Connection failed 1");
+  }
+  Serial.println("Received string: ");
+  Serial.println(rcv); //Display the server response.
+}
+
+void loop() 
+{
+ digitalWrite(p1,HIGH);
+ delay(1000); 
+ digitalWrite(p1,LOW);
+  int ldr=analogRead(p2);
+  float ldr1=5.0-((ldr/1024.0)*5.0);
+  float scale=(ldr1/1.93)*5.0;
+  Serial.print(ldr1);
+  Serial.print("--");
+  Serial.print(ldr1);
+  Serial.print("--");
+  Serial.println(scale);
+
+  if(interrupt==0)
+  {
+    
+      httpRequest(); //Call the function to read the response from the server.
+      delay(1000);
+      if (client.connect(server, 80)) 
+      {
+      Serial.println("Connection Established 2");
+      client.print("GET /info.php?"); //GET request to write data to the database.
+      client.print("request=");
+      client.print("ht");
+      client.println(" HTTP/1.1"); 
+      client.println("Host: 192.168.0.112"); 
+      client.println("Connection: close"); 
+      client.println(); 
+      client.println(); 
+      client.stop();
+      }
+      else
+      {
+        Serial.println("Connection failed 2");
+      }
+  }
+  interrupt++;
+  digitalWrite(p1,LOW);
+  delay(10000);
+}*/

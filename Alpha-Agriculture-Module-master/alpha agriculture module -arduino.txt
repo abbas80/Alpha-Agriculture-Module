@@ -1,0 +1,182 @@
+#include <Wire.h>
+int ini=0;
+int co=-1;
+long l1=0;
+int pinRead0;
+float pVolt0;
+float pVolt01;
+float sum1=0;
+float aver1=0;
+int co1=0;
+float sum2=0;
+float aver2=0;
+  int co2=0;
+float sum3=0;
+float aver3=0;
+int co3=0;
+double ldr_default=0.0;
+void setup() {
+  Serial.begin(9600);
+  pinMode(4,OUTPUT);  
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+  pinMode(A0,INPUT);
+  l1=millis();
+  
+
+ Wire.begin(8);                /* join i2c bus with address 8 */
+ Wire.onReceive(receiveEvent); /* register receive event */
+ Wire.onRequest(requestEvent); /* register request event */
+ Serial.begin(9600); 
+ ldr_default=analogRead(A0);
+Serial.println(analogRead(A0));
+Serial.println(l1);/* start serial for debug */
+}
+
+void loop() {
+  
+  if(millis()-l1<10000)
+  {
+    
+      Serial.println("led1");
+  digitalWrite(4,HIGH);
+  if(co==-1)
+  {
+    delay(1000);
+    
+  
+  digitalWrite(7,LOW);
+  digitalWrite(8,LOW);
+  pinRead0=(analogRead(A0));
+  pVolt0=5.0-(pinRead0/ldr_default)*5.0;
+  pVolt01=((pVolt0)/((2.72/1013)*ldr_default))*5.0;
+  //pVolt01+=pVolt01;
+  sum1=sum1+pVolt01;
+  co1++;
+  Serial.println(pVolt0);
+  Serial.print("o1--");
+  Serial.println(pVolt01);
+  Serial.println(pinRead0);
+  }
+   
+  if(10000<millis()-l1 && millis()-l1<20000)
+  { 
+    
+     Serial.println("led2");
+  digitalWrite(4,LOW);
+  digitalWrite(7,HIGH);
+  if(co==0)
+  {
+    delay(1000);
+    co++;
+  }
+  
+  digitalWrite(8,LOW);
+  pinRead0=(analogRead(A0));
+  pVolt0=5.0-(pinRead0/ldr_default)*5.0;
+  pVolt01=((pVolt0)/((2.17/1013)*ldr_default))*5.0;
+  sum2=sum2+pVolt01;
+  co2++;
+  Serial.println(pVolt0);
+  Serial.print("o1--");
+  Serial.println(pVolt01);
+  Serial.println(pinRead0);
+  }
+  
+ 
+
+  if(20000<millis()-l1 && millis()-l1<30000)
+  {
+    
+     Serial.println("led3");
+  digitalWrite(7,LOW);
+  digitalWrite(8,HIGH);
+  if(co==1)
+  {
+    delay(1000);
+    co++;   
+  }
+   digitalWrite(4,LOW);
+  pinRead0=(analogRead(A0));
+  pVolt0=5.0-(pinRead0/ldr_default)*5.0;
+  pVolt01=((pVolt0)/((3.08/1013)*ldr_default))*5.0;
+  sum3=sum3+pVolt01;
+  co3++;
+  Serial.println(pVolt0);
+  Serial.print("o1--");
+  Serial.println(pVolt01);
+  Serial.println(pinRead0);
+  }
+
+  if(30000<millis()-l1 && co==2)
+  {
+    digitalWrite(8,LOW);  
+     aver1=sum1/co1;
+     aver2=sum2/co2;
+     aver3=sum3/co3;
+     co++;
+     Serial.print("av1 ");
+  Serial.println(aver1);
+  
+     Serial.print("av2 ");
+  Serial.println(aver2);
+  
+     Serial.print("av3 ");
+  Serial.println(aver3);
+  
+   
+   }
+delay(100);
+}
+
+// function that executes whenever data is received from master
+void receiveEvent(int howMany) {
+ while (0 <Wire.available()) {
+    char c = Wire.read();      /* receive byte as a character */
+    Serial.print(c);           /* print the character */
+  }
+ Serial.println();             /* to newline */
+}
+
+// function that executes whenever data is requested from master
+void requestEvent() {
+if(co==3)
+{
+  int d1=aver1*100;
+  int data1=d1%10;
+  d1=d1/10;
+      int data2=d1%10;
+      d1=d1/10;
+      int data3=d1;
+  
+  
+  int d2=aver2*100;
+  int data4=d2%10;
+  d2/=10;
+      int data5=d2%10;
+      d2/=10;
+      int data6=d2;
+
+
+  int d3=aver3*100;
+  int data7=d3%10;
+  d3/=10;
+      int data8=d3%10;
+      d3/=10;
+      int data9=d3;
+     // Wire.write("1721cs1118");
+ Wire.write(data3);
+  Wire.write(data2);
+   Wire.write(data1);
+
+ Wire.write(data6);
+  Wire.write(data5);
+   Wire.write(data4);
+   
+   Wire.write(data9);
+  Wire.write(data8);
+   Wire.write(data7);//    Wire.write(d3);
+}
+// Wire.write(d2);
+ // Wire.write(d1);/*send string on request */
+}
