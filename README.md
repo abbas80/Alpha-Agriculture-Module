@@ -4,8 +4,6 @@ Alpha module helps to estimate the soil fertility status on real time basis and 
 
 ![](Alpha-Agriculture-Module-master/2.jpg)
 
-![](Alpha-Agriculture-Module-master/2.jpg)
-
 # Module
 
 
