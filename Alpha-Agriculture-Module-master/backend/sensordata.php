@@ -17,8 +17,9 @@ $dbconnect = mysqli_connect($server, $dbusername, $dbpassword);
 		$json_array[]=$row;
 		
 	}
-		/*echo '<pre>';
+		//*echo '<pre>';
 		print_r($json_array);
-		echo '</pre>';*/
+		echo '</pre>';*//
+
 	echo json_encode($json_array);
 ?>
